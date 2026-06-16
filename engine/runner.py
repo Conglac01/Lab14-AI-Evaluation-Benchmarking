@@ -1,7 +1,7 @@
 import asyncio
 import time
 from typing import List, Dict
-# Import other components...
+
 
 class BenchmarkRunner:
     def __init__(self, agent, evaluator, judge):
@@ -11,29 +11,41 @@ class BenchmarkRunner:
 
     async def run_single_test(self, test_case: Dict) -> Dict:
         start_time = time.perf_counter()
-        
-        # 1. Gọi Agent
-        response = await self.agent.query(test_case["question"])
-        latency = time.perf_counter() - start_time
-        
-        # 2. Chạy RAGAS metrics
-        ragas_scores = await self.evaluator.score(test_case, response)
-        
-        # 3. Chạy Multi-Judge
-        judge_result = await self.judge.evaluate_multi_judge(
-            test_case["question"], 
-            response["answer"], 
-            test_case["expected_answer"]
-        )
-        
-        return {
-            "test_case": test_case["question"],
-            "agent_response": response["answer"],
-            "latency": latency,
-            "ragas": ragas_scores,
-            "judge": judge_result,
-            "status": "fail" if judge_result["final_score"] < 3 else "pass"
-        }
+        try:
+            response = await self.agent.query(test_case["question"])
+            latency = time.perf_counter() - start_time
+            ragas_scores = await self.evaluator.score(test_case, response)
+            judge_result = await self.judge.evaluate_multi_judge(
+                test_case["question"],
+                response["answer"],
+                test_case["expected_answer"],
+            )
+            tokens_used = response.get("metadata", {}).get("tokens_used", 0)
+            estimated_cost_usd = round(tokens_used * 0.00000015, 6)
+
+            return {
+                "id": test_case.get("id"),
+                "test_case": test_case["question"],
+                "expected_answer": test_case["expected_answer"],
+                "expected_retrieval_ids": test_case.get("expected_retrieval_ids", []),
+                "agent_response": response["answer"],
+                "retrieved_ids": response.get("retrieved_ids", []),
+                "latency": round(latency, 4),
+                "tokens_used": tokens_used,
+                "estimated_cost_usd": estimated_cost_usd,
+                "ragas": ragas_scores,
+                "judge": judge_result,
+                "metadata": test_case.get("metadata", {}),
+                "status": "fail" if judge_result["final_score"] < 3 else "pass",
+            }
+        except Exception as exc:
+            return {
+                "id": test_case.get("id"),
+                "test_case": test_case.get("question"),
+                "latency": round(time.perf_counter() - start_time, 4),
+                "status": "error",
+                "error": str(exc),
+            }
 
     async def run_all(self, dataset: List[Dict], batch_size: int = 5) -> List[Dict]:
         """

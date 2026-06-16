@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "version": "v2",
+    "total": 60,
+    "timestamp": "2026-06-16 14:19:20",
+    "case_type_distribution": {
+      "fact-check": 11,
+      "explain": 11,
+      "metric": 11,
+      "root-cause": 11,
+      "trade-off": 10,
+      "prompt-injection": 1,
+      "out-of-context": 1,
+      "conflict": 1,
+      "regression": 1,
+      "ambiguous": 1,
+      "cost-efficiency": 1
+    },
+    "judge_models": [
+      "gpt-4o-mini-heuristic",
+      "claude-3-5-sonnet-heuristic"
+    ]
+  },
+  "metrics": {
+    "avg_score": 4.958,
+    "pass_rate": 1.0,
+    "hit_rate": 0.967,
+    "mrr": 0.967,
+    "faithfulness": 0.902,
+    "relevancy": 0.998,
+    "agreement_rate": 0.995,
+    "avg_latency_sec": 0.0224,
+    "total_tokens": 5482,
+    "estimated_cost_usd": 0.000814,
+    "wall_clock_sec": 0.143,
+    "judge_conflict_count": 0
+  },
+  "failure_clusters": {},
+  "regression": {
+    "baseline": {
+      "avg_score": 4.916,
+      "pass_rate": 1.0,
+      "hit_rate": 0.967,
+      "mrr": 0.967,
+      "faithfulness": 0.842,
+      "relevancy": 0.998,
+      "agreement_rate": 0.977,
+      "avg_latency_sec": 0.0219,
+      "total_tokens": 4750,
+      "estimated_cost_usd": 0.00072,
+      "wall_clock_sec": 0.136,
+      "judge_conflict_count": 0
+    },
+    "candidate": {
+      "avg_score": 4.958,
+      "pass_rate": 1.0,
+      "hit_rate": 0.967,
+      "mrr": 0.967,
+      "faithfulness": 0.902,
+      "relevancy": 0.998,
+      "agreement_rate": 0.995,
+      "avg_latency_sec": 0.0224,
+      "total_tokens": 5482,
+      "estimated_cost_usd": 0.000814,
+      "wall_clock_sec": 0.143,
+      "judge_conflict_count": 0
+    },
+    "release_gate": {
+      "decision": "APPROVE",
+      "checks": {
+        "quality_threshold": true,
+        "retrieval_threshold": true,
+        "latency_threshold": true,
+        "no_quality_regression": true
+      },
+      "delta": {
+        "avg_score": 0.042,
+        "estimated_cost_usd": 9.4e-05,
+        "hit_rate": 0.0,
+        "avg_latency_sec": 0.0005
+      },
+      "cost_reduction_plan": [
+        "Target at least 30% eval-cost reduction by caching judge outputs for unchanged cases.",
+        "Use cheaper heuristic or small-model judge for easy fact-check cases.",
+        "Run full multi-judge only on failures, hard cases, and changed retrieval slices."
+      ]
+    }
+  }
+}
